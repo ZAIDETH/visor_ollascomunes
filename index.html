@@ -23,8 +23,8 @@
         }
         #header {
             height: 50px;
-            background-color: #0ec7fbea;
-            display: flex;
+            background-color: #2a7bf4;
+            display: flex;            
             align-items: center;
             padding: 5px 15px;
             box-shadow: 0 2px 4px rgba(0,0,0,0.1);
@@ -43,6 +43,8 @@
             font-weight: bold;
             color: #fefefe;
             font-family: sans-serif;
+            text-align: center;  /* Asegura que el título se vea centrado */
+            
         }
 
         #map {
@@ -60,7 +62,7 @@
         }
 
         .leaflet-bar button:hover {
-            background-color: #3367D6;
+            background-color: #2a7bf4;
         }
         /* Estilo para el botón de vista predeterminada */
         #defaultViewButton {
@@ -87,7 +89,7 @@
         }
 
         #defaultViewButton button:hover {
-            background-color: #3367D6; /* Color cuando se pasa el ratón por encima */
+            background-color: #2a7bf4; /* Color cuando se pasa el ratón por encima */
         }
 
         </style>
@@ -96,7 +98,8 @@
     <body>
         <div id="header">
             <img src="static/img/LogoOficialMIDIS.jpg" alt="Logo del MIDIS">
-            <div id="title">Visor de las Zonas de Atención de Ollas Comunes</div>
+            <div id="title">Visor de las Zonas de Atención de Ollas Comunes - Dirección de Monitoreo de la Gestión de las 
+Prestaciones Sociales </div>
         </div>
         <div id="map">
         </div>
@@ -613,7 +616,7 @@
         headerBar.style.display = 'flex';
         headerBar.style.alignItems = 'center';
         headerBar.style.justifyContent = 'space-between';
-        headerBar.style.background = '#0b59f1c7';
+        headerBar.style.background = '#2a7bf4';
         headerBar.style.borderBottom = '1px solid #ccc';
         headerBar.style.padding = '6px 8px';
         headerBar.style.fontWeight = 'bold';
