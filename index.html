@@ -15,20 +15,100 @@
         <link rel="stylesheet" href="css/leaflet.photon.css">
         <link rel="stylesheet" href="css/leaflet-measure.css">
         <style>
-        html, body, #map {
+        html, body {
             width: 100%;
             height: 100%;
             padding: 0;
             margin: 0;
         }
+
+        #header {
+            height: 50px;
+            background-color: #0b59f1c7;
+            display: flex;
+            align-items: center;
+            padding: 5px 15px;
+            box-shadow: 0 2px 4px rgba(0,0,0,0.1);
+            z-index: 1000;
+            position: relative;
+            opacity: 1;
+        }
+
+        #header img {
+            height: 40px;
+            margin-right: 15px;
+        }
+
+        #title {
+            font-size: 16px;
+            font-weight: bold;
+            color: #fefefe;
+            font-family: sans-serif;
+        }
+
+        #map {
+            width: 100%;
+            height: calc(100% - 60px); /* deja espacio para el encabezado */
+        }  
+       
+        #peruShape {
+            width: 40px;
+            height: 40px;
+            background-image: url('path_to_your_peru_geojson_or_svg');  /* Ruta al GeoJSON o SVG */
+            background-size: contain;
+            background-repeat: no-repeat;
+            display: block;
+        }
+
+        .leaflet-bar button:hover {
+            background-color: #3367D6;
+        }
+        /* Estilo para el botón de vista predeterminada */
+        #defaultViewButton {
+            position: absolute;
+            top: 80px;  /* Colócalo debajo del control de zoom */
+            left: 10px;  /* Alineado a la izquierda */
+            z-index: 1002;
+            background-color: rgba(0, 0, 0, 0.5); /* Fondo oscuro con algo de transparencia */
+            padding: 10px;
+            border-radius: 5px;
+        }
+
+        #defaultViewButton button {
+            width: 60px;
+            height: 60px;
+            background-color: transparent;
+            color: white;
+            border: none;
+            border-radius: 5px;
+            font-size: 18px;
+            display: flex;
+            justify-content: center;
+            align-items: center;
+        }
+
+        #defaultViewButton button:hover {
+            background-color: #3367D6; /* Color cuando se pasa el ratón por encima */
+        }
+
         </style>
-        <title></title>
+        <title>Visor de Zonas de Atención de Ollas Comunes</title>
     </head>
     <body>
-        <div id="map">
+        <div id="header">
+            <img src="static/img/LogoOficialMIDIS.jpg" alt="Logo del MIDIS">
+            <div id="title">Visor de Zonas de Atención de Ollas Comunes</div>
+        </div>
+        
+        <!-- Botón de inicio en la parte superior izquierda -->
+        <!-- Contenedor para el botón de "Inicio" con la forma de Perú -->
+        <div id="startButton" class="leaflet-bar">
+            <button>
+                <div id="peruShape"></div>
+            </button>
         </div>
         <script src="js/qgis2web_expressions.js"></script>
-        <script src="js/leaflet.js"></script>
+        <script src="https://unpkg.com/leaflet/dist/leaflet.js"></script>
         <script src="js/L.Control.Layers.Tree.min.js"></script>
         <script src="js/multi-style-layer.js"></script>
         <script src="js/leaflet-svg-shape-markers.min.js"></script>
@@ -42,9 +122,17 @@
         <script src="js/leaflet.photon.js"></script>
         <script src="js/leaflet-measure.js"></script>
         <script src="js/leaflet.markercluster.js"></script>
+        <!-- datos capas -->
         <script src="data/OllasComunesgeorreferenciadas_1.js"></script>
         <script src="data/UsuariosdeOllasComunesgeorreferenciadas_2.js"></script>
+        <!-- Cargar el archivo JavaScript con los datos de departamentos -->
+        <script src="https://github.com/ZAIDETH/visor_atencionanemia/raw/main/data/Departamentos_3.js"></script>
+        
         <script>
+        var map = L.map('map', {
+            center: [ -12.0464, -77.0428 ], // Coordenadas de Lima (puedes cambiarlas)
+            zoom: 5
+        });
         var highlightLayer;
         function highlightFeature(e) {
             highlightLayer = e.target;
@@ -97,6 +185,26 @@
         var zoomControl = L.control.zoom({
             position: 'topleft'
         }).addTo(map);
+
+        // Inicializar el cluster
+            var markers = new L.MarkerClusterGroup();
+
+        // Datos de la capa Usuarios
+        var usersData = json_UsuariosdeOllasComunesgeorreferenciadas_2;
+        // Agregar los puntos de usuarios al mapa en clusters
+        usersData.features.forEach(function(feature) {
+            var latlng = [feature.geometry.coordinates[1], feature.geometry.coordinates[0]]; // Coordenadas de cada punto
+            var marker = L.marker(latlng);
+
+            // Añadir el popup con la información
+            marker.bindPopup('<b>Usuario:</b> ' + feature.properties.Nombre_Ollas_Comunes);
+
+            // Añadir el marcador al grupo de clústeres
+            markers.addLayer(marker);
+        });
+        // Agregar los clusters al mapa
+        map.addLayer(markers);
+
         var measureControl = new L.Control.Measure({
             position: 'topleft',
             primaryLengthUnit: 'meters',
@@ -428,6 +536,22 @@
             initial: true,
             // resultsHandler: myHandler,
         }).addTo(map);
+
+        // Crear la capa GeoJSON para los Departamentos
+            var layer_Departamentos_3 = L.geoJson(json_Departamentos_3, {
+                style: function(feature) {
+                return {
+                    color: '#808080',  // Gris para los límites
+                    weight: 2,          // Grosor de la línea
+                    fillOpacity: 0      // Si solo quieres los límites sin relleno
+                };
+                },
+                onEachFeature: function(feature, layer) {
+                // Agregar un popup con el nombre del departamento
+                layer.bindPopup('<b>Departamento:</b> ' + feature.properties.NOMBRE);
+                }
+            }).addTo(map);  // Añadir la capa GeoJSON al mapa
+
         photonControl._container.childNodes[0].style.borderRadius="10px"
         // Create a variable to store the geoJSON data
         var x = null;
