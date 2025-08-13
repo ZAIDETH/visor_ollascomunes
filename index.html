@@ -250,10 +250,6 @@
             });
             var popupContent = '<table>\
                     <tr>\
-                        <th scope="row">OBJECTID</th>\
-                        <td>' + (feature.properties['OBJECTID'] !== null ? autolinker.link(String(feature.properties['OBJECTID']).replace(/'/g, '\'').toLocaleString()) : '') + '</td>\
-                    </tr>\
-                    <tr>\
                         <th scope="row">Ubigeo</th>\
                         <td>' + (feature.properties['Ubigeo'] !== null ? autolinker.link(String(feature.properties['Ubigeo']).replace(/'/g, '\'').toLocaleString()) : '') + '</td>\
                     </tr>\
@@ -280,14 +276,6 @@
                     <tr>\
                         <th scope="row">Dirección Ollas Comunes</th>\
                         <td>' + (feature.properties['Direccion_Ollas_Comunes'] !== null ? autolinker.link(String(feature.properties['Direccion_Ollas_Comunes']).replace(/'/g, '\'').toLocaleString()) : '') + '</td>\
-                    </tr>\
-                    <tr>\
-                        <th scope="row">Latitud</th>\
-                        <td>' + (feature.properties['Latitud'] !== null ? autolinker.link(String(feature.properties['Latitud']).replace(/'/g, '\'').toLocaleString()) : '') + '</td>\
-                    </tr>\
-                    <tr>\
-                        <th scope="row">Longitud</th>\
-                        <td>' + (feature.properties['Longitud'] !== null ? autolinker.link(String(feature.properties['Longitud']).replace(/'/g, '\'').toLocaleString()) : '') + '</td>\
                     </tr>\
                     <tr>\
                         <th scope="row">Estado</th>\
@@ -367,9 +355,6 @@
             });
             var popupContent = '<table>\
                     <tr>\
-                        <td colspan="2">' + (feature.properties['OBJECTID'] !== null ? autolinker.link(String(feature.properties['OBJECTID']).replace(/'/g, '\'').toLocaleString()) : '') + '</td>\
-                    </tr>\
-                    <tr>\
                         <th scope="row">Nombre Ollas Comunes</th>\
                         <td>' + (feature.properties['Nombre_Ollas_Comunes'] !== null ? autolinker.link(String(feature.properties['Nombre_Ollas_Comunes']).replace(/'/g, '\'').toLocaleString()) : '') + '</td>\
                     </tr>\
@@ -388,9 +373,6 @@
                     <tr>\
                         <th scope="row">Dirección</th>\
                         <td>' + (feature.properties['Direccion'] !== null ? autolinker.link(String(feature.properties['Direccion']).replace(/'/g, '\'').toLocaleString()) : '') + '</td>\
-                    </tr>\
-                    <tr>\
-                        <td colspan="2">' + (feature.properties['HOGAR_ID'] !== null ? autolinker.link(String(feature.properties['HOGAR_ID']).replace(/'/g, '\'').toLocaleString()) : '') + '</td>\
                     </tr>\
                     <tr>\
                         <th scope="row">Centro Poblado</th>\
@@ -459,7 +441,7 @@
             if (exp_UsuariosdeOllasComunesgeorreferenciadas_2rule0_eval_expression(context)) {
                   return {
                 pane: 'pane_UsuariosdeOllasComunesgeorreferenciadas_2',
-                radius: 6.3999999999999995,
+                radius: 6.2,
                 opacity: 1,
                 color: 'rgba(127,45,183,1.0)',
                 dashArray: '',
@@ -485,7 +467,7 @@
             if (exp_UsuariosdeOllasComunesgeorreferenciadas_2rule0_eval_expression(context)) {
                   return {
                 pane: 'pane_UsuariosdeOllasComunesgeorreferenciadas_2',
-                radius: 1.3999999999999997,
+                radius: 1.2,
                 opacity: 1,
                 color: 'rgba(183,62,157,1.0)',
                 dashArray: '',
@@ -604,8 +586,9 @@
         var overlaysTree = [
             {label: 'Usuarios de Ollas Comunes georreferenciadas<br /><table><tr><td style="text-align: center;"><img src="legend/UsuariosdeOllasComunesgeorreferenciadas_2_0.png" /></td><td></td></tr></table>', layer: cluster_UsuariosdeOllasComunesgeorreferenciadas_2},
             {label: '<img src="legend/OllasComunesgeorreferenciadas_1.png" /> Ollas Comunes georreferenciadas', layer: cluster_OllasComunesgeorreferenciadas_1},
-            {label: "Google Satellite", layer: layer_GoogleSatellite_0, radioGroup: 'bm' },]
-        var lay = L.control.layers.tree(null, overlaysTree,{
+            {label: "Google Satellite", layer: layer_GoogleSatellite_0, radioGroup: 'bm' },
+            {label: "OpenStreetMap", layer: layer_OpenStreetMap_0, radioGroup: 'bm' },]
+            var lay = L.control.layers.tree(null, overlaysTree,{
             //namedToggle: true,
             //selectorBack: false,
             //closedSymbol: '&#8862; &#x1f5c0;',
@@ -615,6 +598,36 @@
             collapsed: false, 
         });
         lay.addTo(map);
+        // Crear barra de encabezado con toggle y texto alineados
+        const controlLayersElement = document.querySelector('.leaflet-control-layers');
+        const toggleControl = document.querySelector('.leaflet-control-layers-toggle');
+
+        // Crear contenedor combinado
+        const headerBar = document.createElement('div');
+        headerBar.style.display = 'flex';
+        headerBar.style.alignItems = 'center';
+        headerBar.style.justifyContent = 'space-between';
+        headerBar.style.background = '#0b59f1c7';
+        headerBar.style.borderBottom = '1px solid #ccc';
+        headerBar.style.padding = '6px 8px';
+        headerBar.style.fontWeight = 'bold';
+        headerBar.style.fontSize = '14px';
+        headerBar.style.color = '#fff';
+        headerBar.style.width = '100%';
+        headerBar.style.boxSizing = 'border-box';
+        headerBar.style.opacity = '1';
+        headerBar.style.height= '40px';
+
+        // Crear texto
+        const headerText = document.createElement('span');
+        headerText.innerText = '🗂 Lista de Capas';
+
+        // Mover el botón toggle dentro del header
+        headerBar.appendChild(headerText);
+        headerBar.appendChild(toggleControl);
+
+        // Insertar al principio del control
+        controlLayersElement.insertBefore(headerBar, controlLayersElement.firstChild);
 		document.addEventListener("DOMContentLoaded", function() {
             // set new Layers List height which considers toggle icon
             function newLayersListHeight() {
