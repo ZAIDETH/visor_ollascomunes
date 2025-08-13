@@ -15,13 +15,12 @@
         <link rel="stylesheet" href="css/leaflet.photon.css">
         <link rel="stylesheet" href="css/leaflet-measure.css">
         <style>
-        html, body {
+        html, body, #map {
             width: 100%;
             height: 100%;
             padding: 0;
             margin: 0;
         }
-
         #header {
             height: 50px;
             background-color: #0b59f1c7;
@@ -97,21 +96,13 @@
     <body>
         <div id="header">
             <img src="static/img/LogoOficialMIDIS.jpg" alt="Logo del MIDIS">
-            <div id="title">Visor de Zonas de Atención de Ollas Comunes</div>
+            <div id="title">Visor de las Zonas Prioritarias de Atención de la lucha contra la Anemia</div>
         </div>
-        <div id="map"></div>
-        <!-- Botón de inicio en la parte superior izquierda -->
-        <!-- Contenedor para el botón de "Inicio" con la forma de Perú -->
-        <div id="startButton" class="leaflet-bar">
-            <button>
-                <div id="peruShape"></div>
-            </button>
+        <div id="map">
         </div>
         <script src="js/qgis2web_expressions.js"></script>
         <script src="js/leaflet.js"></script>
-        <script src="https://unpkg.com/leaflet/dist/leaflet.js"></script>
         <script src="js/L.Control.Layers.Tree.min.js"></script>
-        <script src="js/multi-style-layer.js"></script>
         <script src="js/leaflet-svg-shape-markers.min.js"></script>
         <script src="js/leaflet.rotatedMarker.js"></script>
         <script src="js/leaflet.pattern.js"></script>
@@ -123,14 +114,11 @@
         <script src="js/leaflet.photon.js"></script>
         <script src="js/leaflet-measure.js"></script>
         <script src="js/leaflet.markercluster.js"></script>
-        <!-- datos capas -->
-        <script src="data/OllasComunesgeorreferenciadas_1.js"></script>
-        <script src="data/UsuariosdeOllasComunesgeorreferenciadas_2.js"></script>
-        <!-- Cargar el archivo JavaScript con los datos de departamentos -->
-        <script src="https://github.com/ZAIDETH/visor_atencionanemia/raw/main/data/Departamentos_3.js"></script>
-        
+        <script src="data/Departamentos_2.js"></script>
+        <script src="data/Provincias_3.js"></script>
+        <script src="data/Distritos_4.js"></script>
+        <script src="data/OllasComunesgeorreferenciadas_5.js"></script>
         <script>
-        
         var highlightLayer;
         function highlightFeature(e) {
             highlightLayer = e.target;
@@ -183,26 +171,6 @@
         var zoomControl = L.control.zoom({
             position: 'topleft'
         }).addTo(map);
-
-        // Inicializar el cluster
-            var markers = new L.MarkerClusterGroup();
-
-        // Datos de la capa Usuarios
-        var usersData = json_UsuariosdeOllasComunesgeorreferenciadas_2;
-        // Agregar los puntos de usuarios al mapa en clusters
-        usersData.features.forEach(function(feature) {
-            var latlng = [feature.geometry.coordinates[1], feature.geometry.coordinates[0]]; // Coordenadas de cada punto
-            var marker = L.marker(latlng);
-
-            // Añadir el popup con la información
-            marker.bindPopup('<b>Usuario:</b> ' + feature.properties.Nombre_Ollas_Comunes);
-
-            // Añadir el marcador al grupo de clústeres
-            markers.addLayer(marker);
-        });
-        // Agregar los clusters al mapa
-        map.addLayer(markers);
-
         var measureControl = new L.Control.Measure({
             position: 'topleft',
             primaryLengthUnit: 'meters',
@@ -218,26 +186,222 @@
         }
         map.createPane('pane_OpenStreetMap_0');
         map.getPane('pane_OpenStreetMap_0').style.zIndex = 400;
-        var layer_OpenStreetMap_0 = L.tileLayer('http://tile.openstreetmap.org/{z}/{x}/{y}.png', {
+        var layer_OpenStreetMap_0 = L.tileLayer('https://tile.openstreetmap.org/{z}/{x}/{y}.png', {
             pane: 'pane_OpenStreetMap_0',
             opacity: 1.0,
             attribution: '',
             minZoom: 1,
             maxZoom: 28,
+            minNativeZoom: 0,
+            maxNativeZoom: 19
         });
         layer_OpenStreetMap_0;
-        map.createPane('pane_Satellite_1');
-        map.getPane('pane_Satellite_1').style.zIndex = 401;
-        var layer_Satellite_1 = L.tileLayer('https://server.arcgisonline.com/ArcGIS/rest/services/World_Imagery/MapServer/tile/{z}/{y}/{x}', {
-            pane: 'pane_Satellite_1',
+        map.createPane('pane_GoogleSatellite_1');
+        map.getPane('pane_GoogleSatellite_1').style.zIndex = 401;
+        var layer_GoogleSatellite_1 = L.tileLayer('https://mt1.google.com/vt/lyrs=s&x={x}&y={y}&z={z}', {
+            pane: 'pane_GoogleSatellite_1',
             opacity: 1.0,
-            attribution: '',
+            attribution: '<a href="https://www.google.at/permissions/geoguidelines/attr-guide.html">Map data ©2015 Google</a>',
             minZoom: 1,
             maxZoom: 28,
+            minNativeZoom: 0,
+            maxNativeZoom: 20
         });
-        layer_Satellite_1;
-        map.addLayer(layer_Satellite_1);
-        function pop_OllasComunesgeorreferenciadas_1(feature, layer) {
+        layer_GoogleSatellite_1;
+        map.addLayer(layer_GoogleSatellite_1);
+        function pop_Departamentos_2(feature, layer) {
+            layer.on({
+                mouseout: function(e) {
+                    for (var i in e.target._eventParents) {
+                        if (typeof e.target._eventParents[i].resetStyle === 'function') {
+                            e.target._eventParents[i].resetStyle(e.target);
+                        }
+                    }
+                },
+                mouseover: highlightFeature,
+            });
+            var popupContent = '<table>\
+                    <tr>\
+                        <th scope="row">DEPARTAMEN</th>\
+                        <td>' + (feature.properties['DEPARTAMEN'] !== null ? autolinker.link(String(feature.properties['DEPARTAMEN']).replace(/'/g, '\'').toLocaleString()) : '') + '</td>\
+                    </tr>\
+                    <tr>\
+                        <th scope="row">CAPITAL</th>\
+                        <td>' + (feature.properties['CAPITAL'] !== null ? autolinker.link(String(feature.properties['CAPITAL']).replace(/'/g, '\'').toLocaleString()) : '') + '</td>\
+                    </tr>\
+                </table>';
+            var content = removeEmptyRowsFromPopupContent(popupContent, feature);
+			layer.on('popupopen', function(e) {
+				addClassToPopupIfMedia(content, e.popup);
+			});
+			layer.bindPopup(content, { maxHeight: 400 });
+        }
+
+        function style_Departamentos_2_0() {
+            return {
+                pane: 'pane_Departamentos_2',
+                opacity: 1,
+                color: 'rgba(255,255,255,1.0)',
+                dashArray: '',
+                lineCap: 'square',
+                lineJoin: 'bevel',
+                weight: 2.0,
+                fillOpacity: 0,
+                interactive: false,
+            }
+        }
+        map.createPane('pane_Departamentos_2');
+        map.getPane('pane_Departamentos_2').style.zIndex = 402;
+        map.getPane('pane_Departamentos_2').style['mix-blend-mode'] = 'normal';
+        var layer_Departamentos_2 = new L.geoJson(json_Departamentos_2, {
+            attribution: '',
+            interactive: false,
+            dataVar: 'json_Departamentos_2',
+            layerName: 'layer_Departamentos_2',
+            pane: 'pane_Departamentos_2',
+            onEachFeature: pop_Departamentos_2,
+            style: style_Departamentos_2_0,
+        });
+        bounds_group.addLayer(layer_Departamentos_2);
+        map.addLayer(layer_Departamentos_2);
+        function pop_Provincias_3(feature, layer) {
+            layer.on({
+                mouseout: function(e) {
+                    for (var i in e.target._eventParents) {
+                        if (typeof e.target._eventParents[i].resetStyle === 'function') {
+                            e.target._eventParents[i].resetStyle(e.target);
+                        }
+                    }
+                },
+                mouseover: highlightFeature,
+            });
+            var popupContent = '<table>\
+                    <tr>\
+                        <th scope="row">Departamento</th>\
+                        <td>' + (feature.properties['DEPARTAMEN'] !== null ? autolinker.link(String(feature.properties['DEPARTAMEN']).replace(/'/g, '\'').toLocaleString()) : '') + '</td>\
+                    </tr>\
+                    <tr>\
+                        <th scope="row">Código Provincia</th>\
+                        <td>' + (feature.properties['CODPROV'] !== null ? autolinker.link(String(feature.properties['CODPROV']).replace(/'/g, '\'').toLocaleString()) : '') + '</td>\
+                    </tr>\
+                    <tr>\
+                        <th scope="row">Provincia</th>\
+                        <td class="visible-with-data" id="PROVINCIA">' + (feature.properties['PROVINCIA'] !== null ? autolinker.link(String(feature.properties['PROVINCIA']).replace(/'/g, '\'').toLocaleString()) : '') + '</td>\
+                    </tr>\
+                    <tr>\
+                        <td colspan="2">' + (feature.properties['CAPITAL'] !== null ? autolinker.link(String(feature.properties['CAPITAL']).replace(/'/g, '\'').toLocaleString()) : '') + '</td>\
+                    </tr>\
+                    <tr>\
+                        <td colspan="2">' + (feature.properties['FUENTE'] !== null ? autolinker.link(String(feature.properties['FUENTE']).replace(/'/g, '\'').toLocaleString()) : '') + '</td>\
+                    </tr>\
+                    <tr>\
+                        <td colspan="2">' + (feature.properties['Shape_Length'] !== null ? autolinker.link(String(feature.properties['Shape_Length']).replace(/'/g, '\'').toLocaleString()) : '') + '</td>\
+                    </tr>\
+                    <tr>\
+                        <td colspan="2">' + (feature.properties['Shape_Area'] !== null ? autolinker.link(String(feature.properties['Shape_Area']).replace(/'/g, '\'').toLocaleString()) : '') + '</td>\
+                    </tr>\
+                </table>';
+            var content = removeEmptyRowsFromPopupContent(popupContent, feature);
+			layer.on('popupopen', function(e) {
+				addClassToPopupIfMedia(content, e.popup);
+			});
+			layer.bindPopup(content, { maxHeight: 400 });
+        }
+
+        function style_Provincias_3_0() {
+            return {
+                pane: 'pane_Provincias_3',
+                opacity: 1,
+                color: 'rgba(211,211,211,1.0)',
+                dashArray: '',
+                lineCap: 'square',
+                lineJoin: 'bevel',
+                weight: 0.5,
+                fillOpacity: 0,
+                interactive: false,
+            }
+        }
+        map.createPane('pane_Provincias_3');
+        map.getPane('pane_Provincias_3').style.zIndex = 403;
+        map.getPane('pane_Provincias_3').style['mix-blend-mode'] = 'normal';
+        var layer_Provincias_3 = new L.geoJson(json_Provincias_3, {
+            attribution: '',
+            interactive: false,
+            dataVar: 'json_Provincias_3',
+            layerName: 'layer_Provincias_3',
+            pane: 'pane_Provincias_3',
+            onEachFeature: pop_Provincias_3,
+            style: style_Provincias_3_0,
+        });
+        bounds_group.addLayer(layer_Provincias_3);
+        map.addLayer(layer_Provincias_3);
+        function pop_Distritos_4(feature, layer) {
+            layer.on({
+                mouseout: function(e) {
+                    for (var i in e.target._eventParents) {
+                        if (typeof e.target._eventParents[i].resetStyle === 'function') {
+                            e.target._eventParents[i].resetStyle(e.target);
+                        }
+                    }
+                },
+                mouseover: highlightFeature,
+            });
+            var popupContent = '<table>\
+                    <tr>\
+                        <th scope="row">UBIGEO</th>\
+                        <td class="visible-with-data" id="UBIGEO">' + (feature.properties['UBIGEO'] !== null ? autolinker.link(String(feature.properties['UBIGEO']).replace(/'/g, '\'').toLocaleString()) : '') + '</td>\
+                    </tr>\
+                    <tr>\
+                        <th scope="row">Departamento</th>\
+                        <td class="visible-with-data" id="NOMBDEP">' + (feature.properties['NOMBDEP'] !== null ? autolinker.link(String(feature.properties['NOMBDEP']).replace(/'/g, '\'').toLocaleString()) : '') + '</td>\
+                    </tr>\
+                    <tr>\
+                        <th scope="row">Provincia</th>\
+                        <td class="visible-with-data" id="NOMBPROV">' + (feature.properties['NOMBPROV'] !== null ? autolinker.link(String(feature.properties['NOMBPROV']).replace(/'/g, '\'').toLocaleString()) : '') + '</td>\
+                    </tr>\
+                    <tr>\
+                        <th scope="row">Distrito</th>\
+                        <td class="visible-with-data" id="NOMBDIST">' + (feature.properties['NOMBDIST'] !== null ? autolinker.link(String(feature.properties['NOMBDIST']).replace(/'/g, '\'').toLocaleString()) : '') + '</td>\
+                    </tr>\
+                    <tr>\
+                        <td colspan="2">' + (feature.properties['areakm2'] !== null ? autolinker.link(String(feature.properties['areakm2']).replace(/'/g, '\'').toLocaleString()) : '') + '</td>\
+                    </tr>\
+                </table>';
+            var content = removeEmptyRowsFromPopupContent(popupContent, feature);
+			layer.on('popupopen', function(e) {
+				addClassToPopupIfMedia(content, e.popup);
+			});
+			layer.bindPopup(content, { maxHeight: 400 });
+        }
+
+        function style_Distritos_4_0() {
+            return {
+                pane: 'pane_Distritos_4',
+                opacity: 1,
+                color: 'rgba(250,246,49,1.0)',
+                dashArray: '',
+                lineCap: 'square',
+                lineJoin: 'bevel',
+                weight: 2.0,
+                fillOpacity: 0,
+                interactive: false,
+            }
+        }
+        map.createPane('pane_Distritos_4');
+        map.getPane('pane_Distritos_4').style.zIndex = 404;
+        map.getPane('pane_Distritos_4').style['mix-blend-mode'] = 'normal';
+        var layer_Distritos_4 = new L.geoJson(json_Distritos_4, {
+            attribution: '',
+            interactive: false,
+            dataVar: 'json_Distritos_4',
+            layerName: 'layer_Distritos_4',
+            pane: 'pane_Distritos_4',
+            onEachFeature: pop_Distritos_4,
+            style: style_Distritos_4_0,
+        });
+        bounds_group.addLayer(layer_Distritos_4);
+        map.addLayer(layer_Distritos_4);
+        function pop_OllasComunesgeorreferenciadas_5(feature, layer) {
             layer.on({
                 mouseout: function(e) {
                     for (var i in e.target._eventParents) {
@@ -286,8 +450,8 @@
                         <td>' + (feature.properties['Total_Usuarios'] !== null ? autolinker.link(String(feature.properties['Total_Usuarios']).replace(/'/g, '\'').toLocaleString()) : '') + '</td>\
                     </tr>\
                     <tr>\
-                        <th scope="row">Usuarios Georreferenciados</th>\
-                        <td>' + (feature.properties['Usuarios_Georreferenciados'] !== null ? autolinker.link(String(feature.properties['Usuarios_Georreferenciados']).replace(/'/g, '\'').toLocaleString()) : '') + '</td>\
+                        th scope="row">Usuarios Georreferenciados</th>\
+                        <td colspan="2">' + (feature.properties['Usuarios_Georreferenciados'] !== null ? autolinker.link(String(feature.properties['Usuarios_Georreferenciados']).replace(/'/g, '\'').toLocaleString()) : '') + '</td>\
                     </tr>\
                     <tr>\
                         <th scope="row">Usuarios No Georreferenciados</th>\
@@ -301,9 +465,9 @@
 			layer.bindPopup(content, { maxHeight: 400 });
         }
 
-        function style_OllasComunesgeorreferenciadas_1_0() {
+        function style_OllasComunesgeorreferenciadas_5_0() {
             return {
-                pane: 'pane_OllasComunesgeorreferenciadas_1',
+                pane: 'pane_OllasComunesgeorreferenciadas_5',
                 shape: 'triangle',
                 radius: 4.8,
                 opacity: 1,
@@ -318,202 +482,52 @@
                 interactive: true,
             }
         }
-        map.createPane('pane_OllasComunesgeorreferenciadas_1');
-        map.getPane('pane_OllasComunesgeorreferenciadas_1').style.zIndex = 401;
-        map.getPane('pane_OllasComunesgeorreferenciadas_1').style['mix-blend-mode'] = 'normal';
-        var layer_OllasComunesgeorreferenciadas_1 = new L.geoJson(json_OllasComunesgeorreferenciadas_1, {
+        map.createPane('pane_OllasComunesgeorreferenciadas_5');
+        map.getPane('pane_OllasComunesgeorreferenciadas_5').style.zIndex = 405;
+        map.getPane('pane_OllasComunesgeorreferenciadas_5').style['mix-blend-mode'] = 'normal';
+        var layer_OllasComunesgeorreferenciadas_5 = new L.geoJson(json_OllasComunesgeorreferenciadas_5, {
             attribution: '',
             interactive: true,
-            dataVar: 'json_OllasComunesgeorreferenciadas_1',
-            layerName: 'layer_OllasComunesgeorreferenciadas_1',
-            pane: 'pane_OllasComunesgeorreferenciadas_1',
-            onEachFeature: pop_OllasComunesgeorreferenciadas_1,
+            dataVar: 'json_OllasComunesgeorreferenciadas_5',
+            layerName: 'layer_OllasComunesgeorreferenciadas_5',
+            pane: 'pane_OllasComunesgeorreferenciadas_5',
+            onEachFeature: pop_OllasComunesgeorreferenciadas_5,
             pointToLayer: function (feature, latlng) {
                 var context = {
                     feature: feature,
                     variables: {}
                 };
-                return L.shapeMarker(latlng, style_OllasComunesgeorreferenciadas_1_0(feature));
+                return L.shapeMarker(latlng, style_OllasComunesgeorreferenciadas_5_0(feature));
             },
         });
-        var cluster_OllasComunesgeorreferenciadas_1 = new L.MarkerClusterGroup({showCoverageOnHover: false,
+        var cluster_OllasComunesgeorreferenciadas_5 = new L.MarkerClusterGroup({showCoverageOnHover: false,
             spiderfyDistanceMultiplier: 2});
-        cluster_OllasComunesgeorreferenciadas_1.addLayer(layer_OllasComunesgeorreferenciadas_1);
+        cluster_OllasComunesgeorreferenciadas_5.addLayer(layer_OllasComunesgeorreferenciadas_5);
 
-        bounds_group.addLayer(layer_OllasComunesgeorreferenciadas_1);
-        cluster_OllasComunesgeorreferenciadas_1.addTo(map);
-        function pop_UsuariosdeOllasComunesgeorreferenciadas_2(feature, layer) {
-            layer.on({
-                mouseout: function(e) {
-                    for (var i in e.target._eventParents) {
-                        if (typeof e.target._eventParents[i].resetStyle === 'function') {
-                            e.target._eventParents[i].resetStyle(e.target);
-                        }
-                    }
-                },
-                mouseover: highlightFeature,
-            });
-            var popupContent = '<table>\
-                    <tr>\
-                        <th scope="row">Nombre Ollas Comunes</th>\
-                        <td>' + (feature.properties['Nombre_Ollas_Comunes'] !== null ? autolinker.link(String(feature.properties['Nombre_Ollas_Comunes']).replace(/'/g, '\'').toLocaleString()) : '') + '</td>\
-                    </tr>\
-                    <tr>\
-                        <th scope="row">Dirección Ollas Comunes</th>\
-                        <td>' + (feature.properties['Direccion_Ollas_Comunes'] !== null ? autolinker.link(String(feature.properties['Direccion_Ollas_Comunes']).replace(/'/g, '\'').toLocaleString()) : '') + '</td>\
-                    </tr>\
-                    <tr>\
-                        <th scope="row">Nro Documento</th>\
-                        <td>' + (feature.properties['Nro_Documento'] !== null ? autolinker.link(String(feature.properties['Nro_Documento']).replace(/'/g, '\'').toLocaleString()) : '') + '</td>\
-                    </tr>\
-                    <tr>\
-                        <th scope="row">Edad</th>\
-                        <td>' + (feature.properties['Edad'] !== null ? autolinker.link(String(feature.properties['Edad']).replace(/'/g, '\'').toLocaleString()) : '') + '</td>\
-                    </tr>\
-                    <tr>\
-                        <th scope="row">Dirección</th>\
-                        <td>' + (feature.properties['Direccion'] !== null ? autolinker.link(String(feature.properties['Direccion']).replace(/'/g, '\'').toLocaleString()) : '') + '</td>\
-                    </tr>\
-                    <tr>\
-                        <th scope="row">Centro Poblado</th>\
-                        <td class="visible-with-data" id="HOGAR_NOM_CCPP">' + (feature.properties['HOGAR_NOM_CCPP'] !== null ? autolinker.link(String(feature.properties['HOGAR_NOM_CCPP']).replace(/'/g, '\'').toLocaleString()) : '') + '</td>\
-                    </tr>\
-                    <tr>\
-                        <th scope="row">Clasificación Socioeconómica</th>\
-                        <td>' + (feature.properties['HOGAR_CSE_NIV_POBREZA'] !== null ? autolinker.link(String(feature.properties['HOGAR_CSE_NIV_POBREZA']).replace(/'/g, '\'').toLocaleString()) : '') + '</td>\
-                    </tr>\
-                    <tr>\
-                        <th scope="row">Juntos Padrón Actual</th>\
-                        <td>' + (feature.properties['JUNTOS_PADRON_ACTUAL'] !== null ? autolinker.link(String(feature.properties['JUNTOS_PADRON_ACTUAL']).replace(/'/g, '\'').toLocaleString()) : '') + '</td>\
-                    </tr>\
-                    <tr>\
-                        <th scope="row">Pensión 65 Padrón Actual</th>\
-                        <td>' + (feature.properties['PENSION65_PADRON_ACTUAL'] !== null ? autolinker.link(String(feature.properties['PENSION65_PADRON_ACTUAL']).replace(/'/g, '\'').toLocaleString()) : '') + '</td>\
-                    </tr>\
-                    <tr>\
-                        <th scope="row">Contigo Padrón Actual</th>\
-                        <td>' + (feature.properties['CONTIGO_PADRON_ACTUAL'] !== null ? autolinker.link(String(feature.properties['CONTIGO_PADRON_ACTUAL']).replace(/'/g, '\'').toLocaleString()) : '') + '</td>\
-                    </tr>\
-                    <tr>\
-                        <th scope="row">Nivel Clasificación Socioeconómica</th>\
-                        <td>' + (feature.properties['Clasificacionsocioeconomica'] !== null ? autolinker.link(String(feature.properties['Clasificacionsocioeconomica']).replace(/'/g, '\'').toLocaleString()) : '') + '</td>\
-                    </tr>\
-                    <tr>\
-                        <td colspan="2">' + (feature.properties['Datos_Usuarios'] !== null ? autolinker.link(String(feature.properties['Datos_Usuarios']).replace(/'/g, '\'').toLocaleString()) : '') + '</td>\
-                    </tr>\
-                    <tr>\
-                        <th scope="row">Código CCPP</th>\
-                        <td>' + (feature.properties['HOGAR_UBIGEO_CCPP'] !== null ? autolinker.link(String(feature.properties['HOGAR_UBIGEO_CCPP']).replace(/'/g, '\'').toLocaleString()) : '') + '</td>\
-                    </tr>\
-                    <tr>\
-                        <th scope="row">Codigo Olla Común</th>\
-                        <td>' + (feature.properties['Codigo_Olla_Comun'] !== null ? autolinker.link(String(feature.properties['Codigo_Olla_Comun']).replace(/'/g, '\'').toLocaleString()) : '') + '</td>\
-                    </tr>\
-                    <tr>\
-                        <th scope="row">Departamento</th>\
-                        <td>' + (feature.properties['Departamento'] !== null ? autolinker.link(String(feature.properties['Departamento']).replace(/'/g, '\'').toLocaleString()) : '') + '</td>\
-                    </tr>\
-                    <tr>\
-                        <th scope="row">Provincia</th>\
-                        <td>' + (feature.properties['Provincia'] !== null ? autolinker.link(String(feature.properties['Provincia']).replace(/'/g, '\'').toLocaleString()) : '') + '</td>\
-                    </tr>\
-                    <tr>\
-                        <th scope="row">Distrito</th>\
-                        <td>' + (feature.properties['Distrito'] !== null ? autolinker.link(String(feature.properties['Distrito']).replace(/'/g, '\'').toLocaleString()) : '') + '</td>\
-                    </tr>\
-                    <tr>\
-                        <th scope="row">Ubigeo</th>\
-                        <td>' + (feature.properties['Ubigeo'] !== null ? autolinker.link(String(feature.properties['Ubigeo']).replace(/'/g, '\'').toLocaleString()) : '') + '</td>\
-                    </tr>\
-                </table>';
-            var content = removeEmptyRowsFromPopupContent(popupContent, feature);
-			layer.on('popupopen', function(e) {
-				addClassToPopupIfMedia(content, e.popup);
-			});
-			layer.bindPopup(content, { maxHeight: 400 });
-        }
-        function style_UsuariosdeOllasComunesgeorreferenciadas_2_0(feature) {
-            var context = {
-                feature: feature,
-                variables: {}
-            };
-            // Start of if blocks and style check logic
-            if (exp_UsuariosdeOllasComunesgeorreferenciadas_2rule0_eval_expression(context)) {
-                  return {
-                pane: 'pane_UsuariosdeOllasComunesgeorreferenciadas_2',
-                radius: 6.2,
-                opacity: 1,
-                color: 'rgba(127,45,183,1.0)',
-                dashArray: '',
-                lineCap: 'butt',
-                lineJoin: 'miter',
-                weight: 1.0,
-                fill: true,
-                fillOpacity: 1,
-                fillColor: 'rgba(255,255,255,0.2)',
-                interactive: true,
-            };
-                }
-            else {
-                return {fill: false, stroke: false};
+        bounds_group.addLayer(layer_OllasComunesgeorreferenciadas_5);
+        cluster_OllasComunesgeorreferenciadas_5.addTo(map);
+        map.on("zoomend", function(e) {
+            if (map.getZoom() <= 10 && map.getZoom() >= 7) {
+                map.addLayer(layer_Provincias_3);
+            } else if (map.getZoom() > 10 || map.getZoom() < 7) {
+                map.removeLayer(layer_Provincias_3);
             }
-        }
-        function style_UsuariosdeOllasComunesgeorreferenciadas_2_1(feature) {
-            var context = {
-                feature: feature,
-                variables: {}
-            };
-            // Start of if blocks and style check logic
-            if (exp_UsuariosdeOllasComunesgeorreferenciadas_2rule0_eval_expression(context)) {
-                  return {
-                pane: 'pane_UsuariosdeOllasComunesgeorreferenciadas_2',
-                radius: 1.2,
-                opacity: 1,
-                color: 'rgba(183,62,157,1.0)',
-                dashArray: '',
-                lineCap: 'butt',
-                lineJoin: 'miter',
-                weight: 2.0,
-                fill: true,
-                fillOpacity: 1,
-                fillColor: 'rgba(127,45,183,1.0)',
-                interactive: true,
-            };
-                }
-            else {
-                return {fill: false, stroke: false};
+            if (map.getZoom() <= 19 && map.getZoom() >= 8) {
+                map.addLayer(layer_Distritos_4);
+            } else if (map.getZoom() > 19 || map.getZoom() < 8) {
+                map.removeLayer(layer_Distritos_4);
             }
-        }
-        map.createPane('pane_UsuariosdeOllasComunesgeorreferenciadas_2');
-        map.getPane('pane_UsuariosdeOllasComunesgeorreferenciadas_2').style.zIndex = 402;
-        map.getPane('pane_UsuariosdeOllasComunesgeorreferenciadas_2').style['mix-blend-mode'] = 'normal';
-        var layer_UsuariosdeOllasComunesgeorreferenciadas_2 = new L.geoJson.multiStyle(json_UsuariosdeOllasComunesgeorreferenciadas_2, {
-            attribution: '',
-            interactive: true,
-            dataVar: 'json_UsuariosdeOllasComunesgeorreferenciadas_2',
-            layerName: 'layer_UsuariosdeOllasComunesgeorreferenciadas_2',
-            pane: 'pane_UsuariosdeOllasComunesgeorreferenciadas_2',
-            onEachFeature: pop_UsuariosdeOllasComunesgeorreferenciadas_2,
-            pointToLayers: [function (feature, latlng) {
-                var context = {
-                    feature: feature,
-                    variables: {}
-                };
-                return L.circleMarker(latlng, style_UsuariosdeOllasComunesgeorreferenciadas_2_0(feature));
-            },function (feature, latlng) {
-                var context = {
-                    feature: feature,
-                    variables: {}
-                };
-                return L.circleMarker(latlng, style_UsuariosdeOllasComunesgeorreferenciadas_2_1(feature));
-            },
-        ]});
-        var cluster_UsuariosdeOllasComunesgeorreferenciadas_2 = new L.MarkerClusterGroup({showCoverageOnHover: false,
-            spiderfyDistanceMultiplier: 2});
-        cluster_UsuariosdeOllasComunesgeorreferenciadas_2.addLayer(layer_UsuariosdeOllasComunesgeorreferenciadas_2);
-
-        bounds_group.addLayer(layer_UsuariosdeOllasComunesgeorreferenciadas_2);
-        cluster_UsuariosdeOllasComunesgeorreferenciadas_2.addTo(map);
+        });
+            if (map.getZoom() <= 10 && map.getZoom() >= 7) {
+                map.addLayer(layer_Provincias_3);
+            } else if (map.getZoom() > 10 || map.getZoom() < 7) {
+                map.removeLayer(layer_Provincias_3);
+            }
+            if (map.getZoom() <= 19 && map.getZoom() >= 8) {
+                map.addLayer(layer_Distritos_4);
+            } else if (map.getZoom() > 19 || map.getZoom() < 8) {
+                map.removeLayer(layer_Distritos_4);
+            }
         const url = {"Nominatim": "https://nominatim.openstreetmap.org/search?format=geojson&addressdetails=1&",
         "BAN": "https://api-adresse.data.gouv.fr/search/?"}
         var photonControl = L.control.photon({
@@ -524,22 +538,6 @@
             initial: true,
             // resultsHandler: myHandler,
         }).addTo(map);
-
-        // Crear la capa GeoJSON para los Departamentos
-            var layer_Departamentos_3 = L.geoJson(json_Departamentos_3, {
-                style: function(feature) {
-                return {
-                    color: '#808080',  // Gris para los límites
-                    weight: 2,          // Grosor de la línea
-                    fillOpacity: 0      // Si solo quieres los límites sin relleno
-                };
-                },
-                onEachFeature: function(feature, layer) {
-                // Agregar un popup con el nombre del departamento
-                layer.bindPopup('<b>Departamento:</b> ' + feature.properties.NOMBRE);
-                }
-            }).addTo(map);  // Añadir la capa GeoJSON al mapa
-
         photonControl._container.childNodes[0].style.borderRadius="10px"
         // Create a variable to store the geoJSON data
         var x = null;
@@ -584,11 +582,13 @@
             }
         });
         var overlaysTree = [
-            {label: 'Usuarios de Ollas Comunes georreferenciadas<br /><table><tr><td style="text-align: center;"><img src="legend/UsuariosdeOllasComunesgeorreferenciadas_2_0.png" /></td><td></td></tr></table>', layer: cluster_UsuariosdeOllasComunesgeorreferenciadas_2},
-            {label: '<img src="legend/OllasComunesgeorreferenciadas_1.png" /> Ollas Comunes georreferenciadas', layer: cluster_OllasComunesgeorreferenciadas_1},
-            {label: "Google Satellite", layer: layer_GoogleSatellite_0, radioGroup: 'bm' },
+            {label: '<img src="legend/OllasComunesgeorreferenciadas_5.png" /> Ollas Comunes georreferenciadas', layer: cluster_OllasComunesgeorreferenciadas_5},
+            {label: '<img src="legend/Distritos_4.png" /> Distritos', layer: layer_Distritos_4},
+            {label: '<img src="legend/Provincias_3.png" /> Provincias', layer: layer_Provincias_3},
+            {label: '<img src="legend/Departamentos_2.png" /> Departamentos', layer: layer_Departamentos_2},
+            {label: "Google Satellite", layer: layer_GoogleSatellite_1, radioGroup: 'bm' },
             {label: "OpenStreetMap", layer: layer_OpenStreetMap_0, radioGroup: 'bm' },]
-            var lay = L.control.layers.tree(null, overlaysTree,{
+        var lay = L.control.layers.tree(null, overlaysTree,{
             //namedToggle: true,
             //selectorBack: false,
             //closedSymbol: '&#8862; &#x1f5c0;',
@@ -628,7 +628,8 @@
 
         // Insertar al principio del control
         controlLayersElement.insertBefore(headerBar, controlLayersElement.firstChild);
-		document.addEventListener("DOMContentLoaded", function() {
+		//continua codigo original
+        document.addEventListener("DOMContentLoaded", function() {
             // set new Layers List height which considers toggle icon
             function newLayersListHeight() {
                 var layerScrollbarElement = document.querySelector('.leaflet-control-layers-scrollbar');
@@ -679,6 +680,81 @@
             }  
         });       
         setBounds();
+        var i = 0;
+        layer_Departamentos_2.eachLayer(function(layer) {
+            var context = {
+                feature: layer.feature,
+                variables: {}
+            };
+            // Obtener el centro del polígono (centroide)
+            var centroid = layer.getBounds().getCenter();
+            layer.bindTooltip(
+                (layer.feature.properties['DEPARTAMEN'] !== null
+                    ? String('<div style="color: rgba(255, 255, 255, 1); font-size: 5pt; font-weight: bold; font-family: \'Open Sans\', sans-serif; text-shadow: 2px 2px 4px rgba(0, 0, 0, 1); text-align: center;">' + layer.feature.properties['DEPARTAMEN'] + '</div>')
+                    : ''
+                ), 
+                { 
+                    permanent: true,  // Mostrar permanentemente
+                    offset: [0, 0],  // Ajuste de la posición
+                    className: 'css_Departamentos_2',  // Estilo CSS
+                    direction: 'center',  // Centrar el tooltip
+                    // Establecer la posición manualmente en el centro del polígono
+                    latlng: centroid
+                }
+            );
+            labels.push(layer);
+                    totalMarkers += 1;
+                    layer.added = true;
+                    addLabel(layer, i);
+                    i++;
+        });
+        var i = 0;
+        layer_Provincias_3.eachLayer(function(layer) {
+            var context = {
+                feature: layer.feature,
+                variables: {}
+            };
+            // Obtener el centro del polígono (centroide)
+            var centroid = layer.getBounds().getCenter();
+            layer.bindTooltip(
+                (layer.feature.properties['PROVINCIA'] !== null
+                    ?String('<div style="color: rgba(255, 255, 255, 1); font-size: 8pt; font-weight: bold; font-family: \'Open Sans\', sans-serif;text-shadow: 2px 2px 4px rgba(0, 0, 0, 1); text-align: center;">' + layer.feature.properties['PROVINCIA']) + '</div>'
+                    :''
+                ), {permanent: true, offset: [0, 0], className: 'css_Provincias_3',
+                    direction: 'center',  // Centrar el tooltip
+                    // Establecer la posición manualmente en el centro del polígono
+                    latlng: centroid
+                }
+            );
+            labels.push(layer);
+            totalMarkers += 1;
+              layer.added = true;
+              addLabel(layer, i);
+              i++;
+        });
+        var i = 0;
+        layer_Distritos_4.eachLayer(function(layer) {
+            var context = {
+                feature: layer.feature,
+                variables: {}
+            };
+            layer.bindTooltip((layer.feature.properties['NOMBDIST'] !== null?String('<div style="color: #FFFF00; font-size: 10pt; font-weight: bold; font-family: \'Open Sans\', sans-serif;">' + layer.feature.properties['NOMBDIST']) + '</div>':''), {permanent: true, offset: [0, 0], className: 'css_Distritos_4'});
+            labels.push(layer);
+            totalMarkers += 1;
+              layer.added = true;
+              addLabel(layer, i);
+              i++;
+        });
+        resetLabels([layer_Departamentos_2,layer_Provincias_3,layer_Distritos_4]);
+        map.on("zoomend", function(){
+            resetLabels([layer_Departamentos_2,layer_Provincias_3,layer_Distritos_4]);
+        });
+        map.on("layeradd", function(){
+            resetLabels([layer_Departamentos_2,layer_Provincias_3,layer_Distritos_4]);
+        });
+        map.on("layerremove", function(){
+            resetLabels([layer_Departamentos_2,layer_Provincias_3,layer_Distritos_4]);
+        });
         </script>
     </body>
 </html>
