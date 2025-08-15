@@ -64,16 +64,15 @@
         .leaflet-bar button:hover {
             background-color: #2a7bf4;
         }
-        /* Estilo para el botón de vista predeterminada */
-        #defaultViewButton {
-            position: absolute;
-            top: 80px;  /* Colócalo debajo del control de zoom */
-            left: 10px;  /* Alineado a la izquierda */
-            z-index: 1002;
-            background-color: rgba(0, 0, 0, 0.5); /* Fondo oscuro con algo de transparencia */
-            padding: 10px;
-            border-radius: 5px;
+        .btns-control{
+            width:35px;
+            height: 35px;
+            line-height: 70px;
+            background-color: #f8f8f8 !important;
+            text-align: center;
+            cursor: pointer;
         }
+
 
         #defaultViewButton button {
             width: 60px;
@@ -87,7 +86,7 @@
             justify-content: center;
             align-items: center;
         }
-
+        
         #defaultViewButton button:hover {
             background-color: #2a7bf4; /* Color cuando se pasa el ratón por encima */
         }
@@ -121,6 +120,12 @@ Prestaciones Sociales </div>
         <script src="data/Provincias_3.js"></script>
         <script src="data/Distritos_4.js"></script>
         <script src="data/OllasComunesgeorreferenciadas_5.js"></script>
+        <script src="static/js/zoomControls.js"></script>
+        <!-- Load Esri Leaflet from CDN -->
+        <script src="https://unpkg.com/esri-leaflet@3.0.16/dist/esri-leaflet.js"></script>
+        <!-- Load Esri Leaflet Renderers from CDN -->
+        <script src="https://unpkg.com/esri-leaflet-renderers@3.0.1" crossorigin=""></script>
+        <script src="https://unpkg.com/esri-leaflet-vector@4.3.0/dist/esri-leaflet-vector.js"></script>
         <script>
         var highlightLayer;
         function highlightFeature(e) {
@@ -140,6 +145,13 @@ Prestaciones Sociales </div>
         var map = L.map('map', {
             zoomControl:false, maxZoom:28, minZoom:1
         }).fitBounds([[-18.76846611931038,-87.67906875705563],[0.3690215432785938,-62.32842744691562]]);
+
+        // Agregar el Feature Layer de ArcGIS
+        var esriLayer = L.esri.featureLayer({
+            url: 'https://services3.arcgis.com/cuUnbF3SDTclyJzA/ArcGIS/rest/services/PCA2025_republicar/FeatureServer/1' // URL del Feature Server
+        })
+        esriLayer.addTo(map);
+
         var hash = new L.Hash(map);
         map.attributionControl.setPrefix('<a href="https://github.com/tomchadwin/qgis2web" target="_blank">qgis2web</a> &middot; <a href="https://leafletjs.com" title="A JS library for interactive maps">Leaflet</a> &middot; <a href="https://qgis.org">QGIS</a>');
         var autolinker = new Autolinker({truncate: {length: 30, location: 'smart'}});
@@ -182,6 +194,18 @@ Prestaciones Sociales </div>
             secondaryAreaUnit: 'hectares'
         });
         measureControl.addTo(map);
+        // Añadir los botones a la barra de control
+L.Control.HomeButton = L.Control.extend({
+    onAdd: function(map) {
+        var btn = L.DomUtil.create('button', 'leaflet-bar btns-control');
+        btn.innerHTML = '🏠';
+        btn.onclick = function() {
+            map.setView(initialView, initialZoom);
+        };
+        return btn;
+    },
+    onRemove: function(map) {}
+});
         document.getElementsByClassName('leaflet-control-measure-toggle')[0].innerHTML = '';
         document.getElementsByClassName('leaflet-control-measure-toggle')[0].className += ' fas fa-ruler';
         var bounds_group = new L.featureGroup([]);
@@ -210,6 +234,7 @@ Prestaciones Sociales </div>
         });
         layer_GoogleSatellite_1;
         map.addLayer(layer_GoogleSatellite_1);
+
         function pop_Departamentos_2(feature, layer) {
             layer.on({
                 mouseout: function(e) {
