@@ -150,7 +150,14 @@ Prestaciones Sociales </div>
         var esriLayer = L.esri.featureLayer({
             url: 'https://services3.arcgis.com/cuUnbF3SDTclyJzA/ArcGIS/rest/services/PCA2025_republicar/FeatureServer/1' // URL del Feature Server
         })
-        esriLayer.addTo(map);
+        //Porbamos comentando para ver si se carga apagado
+        //esriLayer.addTo(map);
+        // Agregar el Feature Layer de ArcGIS
+        var esriLayer_departamento = L.esri.featureLayer({
+            url: 'https://services3.arcgis.com/cuUnbF3SDTclyJzA/ArcGIS/rest/services/CartoBase_republicar/FeatureServer/5' // URL del Feature Server
+        })
+        //Porbamos comentando para ver si se carga apagado
+        esriLayer_departamento.addTo(map);
 
         var hash = new L.Hash(map);
         map.attributionControl.setPrefix('<a href="https://github.com/tomchadwin/qgis2web" target="_blank">qgis2web</a> &middot; <a href="https://leafletjs.com" title="A JS library for interactive maps">Leaflet</a> &middot; <a href="https://qgis.org">QGIS</a>');
@@ -617,9 +624,11 @@ L.Control.HomeButton = L.Control.extend({
         });
         var overlaysTree = [
             {label: '<img src="legend/OllasComunesgeorreferenciadas_5.png" /> Ollas Comunes georreferenciadas', layer: cluster_OllasComunesgeorreferenciadas_5},
+            {label: '<img src="legend/ollas_esri.png" /> Usuarios de Ollas Comunes (Esri)', layer: esriLayer},
             {label: '<img src="legend/Distritos_4.png" /> Distritos', layer: layer_Distritos_4},
             {label: '<img src="legend/Provincias_3.png" /> Provincias', layer: layer_Provincias_3},
             {label: '<img src="legend/Departamentos_2.png" /> Departamentos', layer: layer_Departamentos_2},
+            {label: '<img src="legend/Departamentos_2.png" /> Departamentos con Ollas(Esri)', layer: esriLayer_departamento},
             {label: "Google Satellite", layer: layer_GoogleSatellite_1, radioGroup: 'bm' },
             {label: "OpenStreetMap", layer: layer_OpenStreetMap_0, radioGroup: 'bm' },]
         var lay = L.control.layers.tree(null, overlaysTree,{
