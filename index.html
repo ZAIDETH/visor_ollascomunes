@@ -177,7 +177,7 @@
             url: 'https://services3.arcgis.com/cuUnbF3SDTclyJzA/ArcGIS/rest/services/PCA2025_republicar/FeatureServer/1', // URL del Feature Server
             onEachFeature: function (feature, layer) {
                 // Definir el contenido del popup
-                var popupTitle = 'Información de Olla Común'; // Título del popup
+                var popupTitle = 'Información de Usuario de Olla Común'; // Título del popup
                 var popupContent = '<h3>' + popupTitle + '</h3>' +
                 '<table>\
                         <tr><th>Departamento:</th><td>' + (feature.properties['Departamento'] !== null ? feature.properties['Departamento'] : 'N/A') + '</td></tr>\
@@ -497,8 +497,10 @@
                 },
                 mouseover: highlightFeature,
             });
-            var popupContent = '<table>\
-                    <tr>\
+
+            var popupTitle = 'Información de Olla Común'; // Título del popup
+            var popupContent = '<h3>' + popupTitle + '</h3>' +
+                '<table>\
                         <th scope="row">Ubigeo</th>\
                         <td>' + (feature.properties['Ubigeo'] !== null ? autolinker.link(String(feature.properties['Ubigeo']).replace(/'/g, '\'').toLocaleString()) : '') + '</td>\
                     </tr>\
