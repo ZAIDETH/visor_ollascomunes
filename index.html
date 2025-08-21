@@ -14,6 +14,9 @@
         <link rel="stylesheet" href="css/MarkerCluster.Default.css">
         <link rel="stylesheet" href="css/leaflet.photon.css">
         <link rel="stylesheet" href="css/leaflet-measure.css">
+        <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.4.0/css/all.min.css">
+        <link rel="stylesheet" href="static/css/home.css">
+        <link rel="stylesheet" href="static/css/btns-control.css">
         <style>
         html, body, #map {
             width: 100%;
@@ -39,7 +42,7 @@
         }
 
         #title {
-            font-size: 16px;
+            font-size: 18px;
             font-weight: bold;
             color: #fefefe;
             font-family: sans-serif;
@@ -90,6 +93,29 @@
         #defaultViewButton button:hover {
             background-color: #2a7bf4; /* Color cuando se pasa el ratón por encima */
         }
+        /* CSS de estilo para el encabezado y el control */
+        .leaflet-control-layers-bar {
+            display: flex;
+            justify-content: space-between;
+            background-color: #2a7bf4;
+            padding: 8px;
+            border-bottom: 1px solid #ccc;
+            font-weight: bold;
+            font-size: 14px;
+            color: white;
+        }
+        .leaflet-control-layers-toggle {
+            background-color: transparent;
+            border: none;
+            color: white;
+            cursor: pointer;
+        }
+        .leaflet-control-layers-toggle:hover {
+            background-color: rgba(255, 255, 255, 0.0);
+            color: #fcfdfd;
+            
+        }
+
 
         </style>
         <title>Visor de Zonas de Atención de Ollas Comunes</title>
@@ -97,11 +123,11 @@
     <body>
         <div id="header">
             <img src="static/img/LogoOficialMIDIS.jpg" alt="Logo del MIDIS">
-            <div id="title">Visor de las Zonas de Atención de Ollas Comunes - Dirección de Monitoreo de la Gestión de las 
-Prestaciones Sociales </div>
+            <div id="title">Supervisión y Monitoreo - Ollas Comunes</div>
         </div>
         <div id="map">
         </div>
+        <!-- <script src="static/js/custom.js"></script> -->
         <script src="js/qgis2web_expressions.js"></script>
         <script src="js/leaflet.js"></script>
         <script src="js/L.Control.Layers.Tree.min.js"></script>
@@ -120,7 +146,7 @@ Prestaciones Sociales </div>
         <script src="data/Provincias_3.js"></script>
         <script src="data/Distritos_4.js"></script>
         <script src="data/OllasComunesgeorreferenciadas_5.js"></script>
-        <script src="static/js/zoomControls.js"></script>
+        <!-- <script src="static/js/zoomControls.js"></script> -->
         <!-- Load Esri Leaflet from CDN -->
         <script src="https://unpkg.com/esri-leaflet@3.0.16/dist/esri-leaflet.js"></script>
         <!-- Load Esri Leaflet Renderers from CDN -->
@@ -148,10 +174,30 @@ Prestaciones Sociales </div>
 
         // Agregar el Feature Layer de ArcGIS
         var esriLayer = L.esri.featureLayer({
-            url: 'https://services3.arcgis.com/cuUnbF3SDTclyJzA/ArcGIS/rest/services/PCA2025_republicar/FeatureServer/1' // URL del Feature Server
+            url: 'https://services3.arcgis.com/cuUnbF3SDTclyJzA/ArcGIS/rest/services/PCA2025_republicar/FeatureServer/1', // URL del Feature Server
+            onEachFeature: function (feature, layer) {
+                // Definir el contenido del popup
+                var popupTitle = 'Información de Olla Común'; // Título del popup
+                var popupContent = '<h3>' + popupTitle + '</h3>' +
+                '<table>\
+                        <tr><th>Departamento:</th><td>' + (feature.properties['Departamento'] !== null ? feature.properties['Departamento'] : 'N/A') + '</td></tr>\
+                        <tr><th>Provincia:</th><td>' + (feature.properties['Provincia'] !== null ? feature.properties['Provincia'] : 'N/A') + '</td></tr>\
+                        <tr><th>Distrito:</th><td>' + (feature.properties['Distrito'] !== null ? feature.properties['Distrito'] : 'N/A') + '</td></tr>\
+                        <tr><th>Ubigeo:</th><td>' + (feature.properties['Ubigeo'] !== null ? feature.properties['Ubigeo'] : 'N/A') + '</td></tr>\
+                        <tr><th>CCPP:</th><td>' + (feature.properties['HOGAR_UBIGEO_CCPP'] !== null ? feature.properties['HOGAR_UBIGEO_CCPP'] : 'N/A') + '</td></tr>\
+                        <tr><th>Código Olla Común:</th><td>' + (feature.properties['Codigo_Olla_Comun'] !== null ? feature.properties['Codigo_Olla_Comun'] : 'N/A') + '</td></tr>\
+                        <tr><th>Nombre Ollas Comunes:</th><td>' + (feature.properties['Nombre_Ollas_Comunes'] !== null ? feature.properties['Nombre_Ollas_Comunes'] : 'N/A') + '</td></tr>\
+                        <tr><th>Dirección Ollas Comunes:</th><td>' + (feature.properties['Direccion_Ollas_Comunes'] !== null ? feature.properties['Direccion_Ollas_Comunes'] : 'N/A') + '</td></tr>\
+                        <tr><th>DNI:</th><td>' + (feature.properties['Nro_Documento'] !== null ? feature.properties['Nro_Documento'] : 'N/A') + '</td></tr>\
+                        <tr><th>Datos Usuarios:</th><td>' + (feature.properties['Datos_Usuarios'] !== null ? feature.properties['Datos_Usuarios'] : 'N/A') + '</td></tr>\
+                        <tr><th>Edad:</th><td>' + (feature.properties['Edad'] !== null ? feature.properties['Edad'] : 'N/A') + '</td></tr>\
+                    </table>';
+
+                // Asociar el popup a la capa
+                layer.bindPopup(popupContent);
+            }
         })
-        //Porbamos comentando para ver si se carga apagado
-        //esriLayer.addTo(map);
+        // .addTo(map);
         // Agregar el Feature Layer de ArcGIS
         var esriLayer_departamento = L.esri.featureLayer({
             url: 'https://services3.arcgis.com/cuUnbF3SDTclyJzA/ArcGIS/rest/services/CartoBase_republicar/FeatureServer/5' // URL del Feature Server
@@ -202,17 +248,17 @@ Prestaciones Sociales </div>
         });
         measureControl.addTo(map);
         // Añadir los botones a la barra de control
-L.Control.HomeButton = L.Control.extend({
-    onAdd: function(map) {
-        var btn = L.DomUtil.create('button', 'leaflet-bar btns-control');
-        btn.innerHTML = '🏠';
-        btn.onclick = function() {
-            map.setView(initialView, initialZoom);
-        };
-        return btn;
-    },
-    onRemove: function(map) {}
-});
+        L.Control.HomeButton = L.Control.extend({
+            onAdd: function(map) {
+                var btn = L.DomUtil.create('button', 'leaflet-bar btns-control');
+                btn.innerHTML = '🏠';
+                btn.onclick = function() {
+                    map.setView(initialView, initialZoom);
+                };
+                return btn;
+            },
+            onRemove: function(map) {}
+        });
         document.getElementsByClassName('leaflet-control-measure-toggle')[0].innerHTML = '';
         document.getElementsByClassName('leaflet-control-measure-toggle')[0].className += ' fas fa-ruler';
         var bounds_group = new L.featureGroup([]);
@@ -547,28 +593,64 @@ L.Control.HomeButton = L.Control.extend({
 
         bounds_group.addLayer(layer_OllasComunesgeorreferenciadas_5);
         cluster_OllasComunesgeorreferenciadas_5.addTo(map);
-        map.on("zoomend", function(e) {
-            if (map.getZoom() <= 10 && map.getZoom() >= 7) {
-                map.addLayer(layer_Provincias_3);
-            } else if (map.getZoom() > 10 || map.getZoom() < 7) {
-                map.removeLayer(layer_Provincias_3);
+        map.on("zoomend", function() {
+            // Asegurarse de que la capa de Departamentos siempre esté visible
+            if (!map.hasLayer(layer_departamentos_2)) {
+                map.addLayer(layer_departamentos_2);  // Asegurarse de que siempre esté visible
             }
-            if (map.getZoom() <= 19 && map.getZoom() >= 8) {
-                map.addLayer(layer_Distritos_4);
-            } else if (map.getZoom() > 19 || map.getZoom() < 8) {
-                map.removeLayer(layer_Distritos_4);
+
+            // Condición de zoom para Provincias (aparece entre zoom 10 y 14)
+            if (map.getZoom() >= 10 && map.getZoom() <= 14) {
+                if (!map.hasLayer(layer_Provincias_3)) {
+                    map.addLayer(layer_Provincias_3); // Agregar capa de Provincias
+                }
+            } else {
+                if (map.hasLayer(layer_Provincias_3)) {
+                    map.removeLayer(layer_Provincias_3); // Eliminar capa de Provincias
+                }
+            }
+
+            // Condición de zoom para Distritos (aparece entre zoom 14 y 28)
+            if (map.getZoom() >= 14 && map.getZoom() <= 28) {
+                if (!map.hasLayer(layer_Distritos_4)) {
+                    map.addLayer(layer_Distritos_4); // Agregar capa de Distritos
+                }
+            } else {
+                if (map.hasLayer(layer_Distritos_4)) {
+                    map.removeLayer(layer_Distritos_4); // Eliminar capa de Distritos
+                }
+            }
+             // Condición de zoom para Distritos (aparece entre zoom 14 y 28)
+            if (map.getZoom() >= 14 && map.getZoom() <= 28) {
+                if (!map.hasLayer(layer_Distritos_4)) {
+                    map.addLayer(layer_Distritos_4); // Agregar capa de Distritos
+                }
+            } else {
+                if (map.hasLayer(layer_Distritos_4)) {
+                    map.removeLayer(layer_Distritos_4); // Eliminar capa de Distritos
+                }
+            }
+            // Condición de zoom para esriLayer_Departamento (desaparece completamente al zoom > 12)
+            if (map.getZoom() >= 1 && map.getZoom() <= 10) {
+                if (!map.hasLayer(esriLayer_departamento)) {
+                    map.addLayer(esriLayer_departamento); // Asegurarse de que la capa esté visible
+                }
+            } else {
+                if (map.hasLayer(esriLayer_departamento)) {
+                    map.removeLayer(esriLayer_departamento); // Eliminar completamente la capa
+                }
             }
         });
-            if (map.getZoom() <= 10 && map.getZoom() >= 7) {
-                map.addLayer(layer_Provincias_3);
-            } else if (map.getZoom() > 10 || map.getZoom() < 7) {
-                map.removeLayer(layer_Provincias_3);
-            }
-            if (map.getZoom() <= 19 && map.getZoom() >= 8) {
-                map.addLayer(layer_Distritos_4);
-            } else if (map.getZoom() > 19 || map.getZoom() < 8) {
-                map.removeLayer(layer_Distritos_4);
-            }
+
+        // Asegurarse de que las capas no se carguen al inicio si están fuera de su rango de zoom
+        if (map.getZoom() < 10 || map.getZoom() > 1) {
+            map.removeLayer(layer_Provincias_3); // Eliminar Provincias si no está en el rango adecuado
+        }
+        if (map.getZoom() < 13 || map.getZoom() > 28) {
+            map.removeLayer(layer_Distritos_4); // Eliminar Distritos si no está en el rango adecuado
+        }
+        
+
         const url = {"Nominatim": "https://nominatim.openstreetmap.org/search?format=geojson&addressdetails=1&",
         "BAN": "https://api-adresse.data.gouv.fr/search/?"}
         var photonControl = L.control.photon({
@@ -624,7 +706,7 @@ L.Control.HomeButton = L.Control.extend({
         });
         var overlaysTree = [
             {label: '<img src="legend/OllasComunesgeorreferenciadas_5.png" /> Ollas Comunes georreferenciadas', layer: cluster_OllasComunesgeorreferenciadas_5},
-            {label: '<img src="legend/ollas_esri.png" /> Usuarios de Ollas Comunes (Esri)', layer: esriLayer},
+            {label: '<img src="static/legend/UsuariosOllas.png" /> Usuarios de Ollas Comunes (Esri)', layer: esriLayer},
             {label: '<img src="legend/Distritos_4.png" /> Distritos', layer: layer_Distritos_4},
             {label: '<img src="legend/Provincias_3.png" /> Provincias', layer: layer_Provincias_3},
             {label: '<img src="legend/Departamentos_2.png" /> Departamentos', layer: layer_Departamentos_2},
@@ -803,5 +885,7 @@ L.Control.HomeButton = L.Control.extend({
             resetLabels([layer_Departamentos_2,layer_Provincias_3,layer_Distritos_4]);
         });
         </script>
+        <script src="static/js/mainMap.js"></script>
+        <script src="static/js/home.js"></script>
     </body>
 </html>
